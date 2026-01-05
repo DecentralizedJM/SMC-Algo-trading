@@ -13,7 +13,7 @@ Smart Money Concepts automated trading bot using ICT indicators and Mudrex API.
 1. Install dependencies:
 ```bash
 pip install smartmoneyconcepts pandas numpy requests
-pip install git+https://github.com/DecentralizedJM/mudrex-api-trading-python-sdk.git
+pip install mudrex-trading-sdk
 ```
 
 2. Configure `config.json` with your API credentials

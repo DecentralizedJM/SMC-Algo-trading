@@ -4,7 +4,7 @@
 smartmoneyconcepts>=0.0.26
 
 # Mudrex SDK
-git+https://github.com/DecentralizedJM/mudrex-api-trading-python-sdk.git
+mudrex-trading-sdk
 
 # Data handling
 pandas>=2.0.0

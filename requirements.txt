@@ -1,0 +1,14 @@
+# SMC Trading Bot Dependencies
+
+# Smart Money Concepts indicators
+smartmoneyconcepts>=0.0.26
+
+# Mudrex SDK
+git+https://github.com/DecentralizedJM/mudrex-api-trading-python-sdk.git
+
+# Data handling
+pandas>=2.0.0
+numpy>=1.24.0
+
+# HTTP requests
+requests>=2.28.0

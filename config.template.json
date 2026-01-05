@@ -1,0 +1,29 @@
+{
+    "mudrex": {
+        "api_key": "",
+        "api_secret": "",
+        "leverage": 20,
+        "margin_per_trade": 2.0,
+        "max_positions": 5,
+        "filter": {
+            "quote_currency": "USDT",
+            "min_volume_24h": 0,
+            "max_symbols": 999
+        },
+        "scan_delay_ms": 150
+    },
+    "strategy": {
+        "timeframe": "15",
+        "swing_length": 10,
+        "ob_lookback": 50,
+        "fvg_join_consecutive": true,
+        "atr_period": 14,
+        "tp_atr_mult": 2.0,
+        "sl_atr_mult": 1.5,
+        "require_fvg_confluence": false
+    },
+    "bot": {
+        "check_interval_seconds": 60,
+        "dry_run": false
+    }
+}

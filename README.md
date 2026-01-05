@@ -41,5 +41,12 @@ Edit `config.json`:
 ## Environment Variables (for Railway)
 
 Set these in Railway dashboard:
-- `MUDREX_API_KEY`
-- `MUDREX_API_SECRET`
+
+| Variable | Required | Description | Default |
+|----------|----------|-------------|---------|
+| `MUDREX_API_KEY` | ✅ | Your Mudrex API Key | - |
+| `MUDREX_API_SECRET` | ✅ | Your Mudrex API Secret | - |
+| `MARGIN_PER_TRADE` | ❌ | Margin per position in USD | 2.0 |
+| `LEVERAGE` | ❌ | Trading leverage | 20 |
+| `MAX_POSITIONS` | ❌ | Max concurrent positions | 5 |
+| `DRY_RUN` | ❌ | Set to "true" for paper trading | false |

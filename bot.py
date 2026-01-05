@@ -51,6 +51,16 @@ class SMCTradingBot:
         self.config["mudrex"]["api_key"] = api_key
         self.config["mudrex"]["api_secret"] = api_secret
         
+        # Trading settings from env vars
+        if os.environ.get("MARGIN_PER_TRADE"):
+            self.config["mudrex"]["margin_per_trade"] = float(os.environ.get("MARGIN_PER_TRADE"))
+        if os.environ.get("LEVERAGE"):
+            self.config["mudrex"]["leverage"] = int(os.environ.get("LEVERAGE"))
+        if os.environ.get("MAX_POSITIONS"):
+            self.config["mudrex"]["max_positions"] = int(os.environ.get("MAX_POSITIONS"))
+        if os.environ.get("DRY_RUN"):
+            self.config["bot"]["dry_run"] = os.environ.get("DRY_RUN", "false").lower() == "true"
+        
         # Initialize Mudrex client to fetch symbols
         self.mudrex_client = MudrexClient(api_secret=self.config["mudrex"]["api_secret"])
         

@@ -1,14 +1,14 @@
 # SMC Trading Bot Dependencies
 
-# Smart Money Concepts indicators
-smartmoneyconcepts==0.0.26
-
 # Mudrex SDK (from GitHub - not on PyPI)
 git+https://github.com/DecentralizedJM/mudrex-api-trading-python-sdk.git
 
-# Data handling - use versions with pre-built wheels for Python 3.12
-numpy==2.0.0
-pandas==2.2.2
+# Smart Money Concepts indicators (must install after pandas due to strict dep)
+smartmoneyconcepts==0.0.26
+
+# Data handling - match smartmoneyconcepts dependency
+pandas==2.0.2
+numpy>=1.24.0,<2.0.0
 
 # HTTP requests
-requests==2.32.3
+requests>=2.28.0

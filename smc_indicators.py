@@ -13,7 +13,21 @@ Calculates Smart Money Concepts indicators:
 import logging
 import pandas as pd
 import numpy as np
-from smartmoneyconcepts import smc
+import sys
+import os
+
+# Suppress "Thank you for using SmartMoneyConcepts" message
+try:
+    with open(os.devnull, 'w') as devnull:
+        old_stdout = sys.stdout
+        sys.stdout = devnull
+        try:
+            from smartmoneyconcepts import smc
+        finally:
+            sys.stdout = old_stdout
+except Exception:
+    # Fallback if suppression fails
+    from smartmoneyconcepts import smc
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

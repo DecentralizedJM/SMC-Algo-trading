@@ -3,8 +3,8 @@
 # Smart Money Concepts indicators
 smartmoneyconcepts>=0.0.26
 
-# Mudrex SDK
-mudrex-trading-sdk
+# Mudrex SDK (from GitHub - not on PyPI)
+git+https://github.com/DecentralizedJM/mudrex-api-trading-python-sdk.git
 
 # Data handling
 pandas>=2.0.0

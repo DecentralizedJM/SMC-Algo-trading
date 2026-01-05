@@ -37,9 +37,16 @@ class SMCTradingBot:
         """Initialize the bot with configuration."""
         import os
         
-        # Load config
-        with open(config_path, 'r') as f:
-            self.config = json.load(f)
+        # Load config - try primary path first, then template
+        if os.path.exists(config_path):
+            with open(config_path, 'r') as f:
+                self.config = json.load(f)
+        elif os.path.exists("config.template.json"):
+            logger.info("⚠️ config.json not found, using config.template.json")
+            with open("config.template.json", 'r') as f:
+                self.config = json.load(f)
+        else:
+            raise FileNotFoundError(f"Could not find {config_path} or config.template.json")
         
         # Override with environment variables if set (for Railway deployment)
         api_key = os.environ.get("MUDREX_API_KEY", self.config["mudrex"].get("api_key", ""))

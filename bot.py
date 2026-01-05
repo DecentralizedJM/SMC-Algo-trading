@@ -49,6 +49,8 @@ class SMCTradingBot:
             raise FileNotFoundError(f"Could not find {config_path} or config.template.json")
         
         # Override with environment variables if set (for Railway deployment)
+        logger.info(f"Environment keys available: {[k for k in os.environ.keys() if 'API' in k or 'MUDREX' in k]}")
+        
         api_key = os.environ.get("MUDREX_API_KEY", self.config["mudrex"].get("api_key", ""))
         api_secret = os.environ.get("MUDREX_API_SECRET", self.config["mudrex"].get("api_secret", ""))
         

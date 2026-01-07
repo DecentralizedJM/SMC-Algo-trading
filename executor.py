@@ -244,11 +244,12 @@ class MudrexExecutor:
     def get_available_symbols(self) -> list:
         """Get list of available trading symbols."""
         try:
-            markets = self.client.markets.get_futures_markets()
-            return [m.symbol for m in markets]
+            assets = self.client.assets.list_all()
+            return [a.symbol for a in assets if a.symbol]
         except Exception as e:
-            logger.error(f"Failed to get markets: {e}")
-            return []
+            logger.error(f"Failed to get assets: {e}")
+            # Fallback to common symbols
+            return ["BTCUSDT", "ETHUSDT", "SOLUSDT", "DOGEUSDT", "XRPUSDT", "ADAUSDT"]
 
 if __name__ == "__main__":
     # Test

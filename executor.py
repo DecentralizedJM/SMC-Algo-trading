@@ -240,7 +240,15 @@ class MudrexExecutor:
         except Exception as e:
             logger.error(f"❌ Failed to close position: {e}")
             return False
-
+    
+    def get_available_symbols(self) -> list:
+        """Get list of available trading symbols."""
+        try:
+            markets = self.client.markets.get_futures_markets()
+            return [m.symbol for m in markets]
+        except Exception as e:
+            logger.error(f"Failed to get markets: {e}")
+            return []
 
 if __name__ == "__main__":
     # Test

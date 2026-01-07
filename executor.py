@@ -148,6 +148,22 @@ class MudrexExecutor:
             logger.error(f"❌ Order failed: {e}")
             return None
     
+    def place_market_order(
+        self,
+        symbol: str,
+        side: str,
+        sl_price: float = None,
+        tp_price: float = None
+    ) -> Optional[Order]:
+        """Alias for place_order - used by bot.py."""
+        return self.place_order(
+            symbol=symbol,
+            side=side,
+            leverage=self.max_leverage,
+            tp=tp_price,
+            sl=sl_price
+        )
+    
     def _set_sltp(self, symbol: str, sl: float, tp: float):
         """Set SL/TP on position with fallback logic."""
         try:

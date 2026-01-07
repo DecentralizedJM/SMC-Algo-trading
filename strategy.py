@@ -105,13 +105,16 @@ class LiquiditySweepStrategy(BaseStrategy):
         if df is None or len(df) < 50:
             return None, None
             
-        # Get recent swing points
-        # smc_indicators calculates these
-        recent_swings = df[df["swing_hl"] != 0].tail(5)
+        # Get recent swing points - only check last 2 (reduced from 5)
+        recent_swings = df[df["swing_hl"] != 0].tail(2)
         
         # Current candle
         curr = df.iloc[-1]
         prev = df.iloc[-2]
+        
+        # Volume filter - require above average volume on sweep candle
+        avg_volume = df["volume"].tail(20).mean()
+        require_volume = self.cfg.get("require_volume", True)
         
         # Check Long (Sweep of Swing Low)
         for idx, swing in recent_swings.iterrows():
@@ -122,7 +125,15 @@ class LiquiditySweepStrategy(BaseStrategy):
                 swept = df["low"].iloc[-2] < level or df["low"].iloc[-1] < level
                 rejected = df["close"].iloc[-1] > level
                 
-                if swept and rejected:
+                # Additional filters
+                has_volume = curr["volume"] > avg_volume * 1.2 if require_volume else True
+                
+                # Minimum sweep distance (0.1% beyond level)
+                min_sweep = level * 0.001
+                actual_sweep = level - min(df["low"].iloc[-2], df["low"].iloc[-1])
+                meaningful_sweep = actual_sweep > min_sweep
+                
+                if swept and rejected and has_volume and meaningful_sweep:
                     return "LONG", {
                         "strategy": "LiquiditySweep",
                         "entry_price": curr["close"],
@@ -139,7 +150,15 @@ class LiquiditySweepStrategy(BaseStrategy):
                 swept = df["high"].iloc[-2] > level or df["high"].iloc[-1] > level
                 rejected = df["close"].iloc[-1] < level
                 
-                if swept and rejected:
+                # Additional filters
+                has_volume = curr["volume"] > avg_volume * 1.2 if require_volume else True
+                
+                # Minimum sweep distance
+                min_sweep = level * 0.001
+                actual_sweep = max(df["high"].iloc[-2], df["high"].iloc[-1]) - level
+                meaningful_sweep = actual_sweep > min_sweep
+                
+                if swept and rejected and has_volume and meaningful_sweep:
                     return "SHORT", {
                         "strategy": "LiquiditySweep",
                         "entry_price": curr["close"],

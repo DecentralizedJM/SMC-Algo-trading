@@ -69,7 +69,11 @@ class SMCTradingBot:
         # Initialize components
         self.fetcher = BybitDataFetcher()
         self.strategy = StrategyManager(self.config)
-        self.executor = MudrexExecutor(self.config)
+        self.executor = MudrexExecutor(
+            api_secret=self.config["mudrex"]["api_secret"],
+            margin_per_trade=self.config["mudrex"]["margin_per_trade"],
+            max_leverage=self.config["mudrex"]["leverage"]
+        )
         self.tracker = TradeTracker()
         
         self.dry_run = self.config["bot"].get("dry_run", False)

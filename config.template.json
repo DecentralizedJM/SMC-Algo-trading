@@ -4,7 +4,7 @@
         "api_secret": "",
         "leverage": 20,
         "margin_per_trade": 2.0,
-        "max_positions": 5,
+        "max_positions": 3,
         "filter": {
             "quote_currency": "USDT",
             "min_volume_24h": 0,

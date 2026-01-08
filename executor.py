@@ -4,6 +4,7 @@ Mudrex Trade Executor - Execute trades using the SDK.
 
 import logging
 import time
+from datetime import datetime, timedelta
 from typing import Optional, Tuple
 from mudrex import MudrexClient
 from mudrex.models import Order, Position
@@ -11,6 +12,9 @@ from mudrex.utils import calculate_order_from_usd
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+# Cooldown duration after insufficient balance error
+BALANCE_COOLDOWN_HOURS = 1
 
 
 class MudrexExecutor:
@@ -34,6 +38,9 @@ class MudrexExecutor:
         self.margin_per_trade = margin_per_trade
         self.max_leverage = max_leverage
         
+        # Cooldown tracking - don't attempt orders until this time
+        self._balance_cooldown_until: Optional[datetime] = None
+        
         logger.info(f"Executor initialized - Margin/Trade: ${margin_per_trade}, Max Leverage: {max_leverage}x")
     
     def check_balance(self) -> float:
@@ -44,6 +51,40 @@ class MudrexExecutor:
         except Exception as e:
             logger.error(f"Failed to check balance: {e}")
             return 0.0
+    
+    def is_in_cooldown(self) -> Tuple[bool, int]:
+        """
+        Check if we're in balance cooldown period.
+        
+        Returns:
+            (is_in_cooldown, minutes_remaining)
+        """
+        if self._balance_cooldown_until is None:
+            return False, 0
+        
+        now = datetime.now()
+        if now < self._balance_cooldown_until:
+            remaining = (self._balance_cooldown_until - now).total_seconds() / 60
+            return True, int(remaining)
+        
+        # Cooldown expired
+        self._balance_cooldown_until = None
+        return False, 0
+    
+    def activate_cooldown(self):
+        """Activate 1-hour cooldown after insufficient balance error."""
+        self._balance_cooldown_until = datetime.now() + timedelta(hours=BALANCE_COOLDOWN_HOURS)
+        logger.warning(f"⚠️ Balance cooldown activated for {BALANCE_COOLDOWN_HOURS} hour(s) - no orders until {self._balance_cooldown_until.strftime('%H:%M:%S')}")
+    
+    def _is_insufficient_balance_error(self, error: Exception) -> bool:
+        """Check if an error is due to insufficient balance."""
+        error_str = str(error).lower()
+        return any(term in error_str for term in [
+            "insufficient",
+            "balance",
+            "margin",
+            "not enough"
+        ])
     
     def calculate_position_size(
         self,
@@ -104,6 +145,12 @@ class MudrexExecutor:
         Returns:
             Order object if successful
         """
+        # Check if in cooldown
+        in_cooldown, minutes_remaining = self.is_in_cooldown()
+        if in_cooldown:
+            logger.warning(f"⏳ In balance cooldown, {minutes_remaining} minutes remaining. Skipping order.")
+            return None
+        
         try:
             actual_leverage = min(leverage, self.max_leverage)
             
@@ -146,6 +193,11 @@ class MudrexExecutor:
             
         except Exception as e:
             logger.error(f"❌ Order failed: {e}")
+            
+            # Check if this is an insufficient balance error
+            if self._is_insufficient_balance_error(e):
+                self.activate_cooldown()
+            
             return None
     
     def place_market_order(

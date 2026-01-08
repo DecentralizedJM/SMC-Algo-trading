@@ -197,17 +197,31 @@ class SMCTradingBot:
         logger.info(f"Active Strategies: {active}")
         logger.info("============================================================")
         
+        # Enforce max 3 positions regardless of config
+        MAX_POSITIONS = 3
+        
         while True:
             try:
-                # 1. Check open positions (Take Profit / Stop Loss is handled by Mudrex/Exchange)
-                # But we can track them here
+                # 1. Check if in balance cooldown
+                in_cooldown, minutes_remaining = self.executor.is_in_cooldown()
+                if in_cooldown:
+                    logger.info(f"⏳ In balance cooldown, {minutes_remaining} minutes remaining. Waiting...")
+                    time.sleep(60)
+                    continue
+                
+                # 2. Check open positions (Take Profit / Stop Loss is handled by Mudrex/Exchange)
                 open_positions = self.executor.get_open_positions()
+                current_count = len(open_positions)
+                
+                # Log position status
+                logger.info(f"📊 Open positions: {current_count}/{MAX_POSITIONS}")
                 
                 # Update tracker
                 self.tracker.print_summary()
                 
-                if len(open_positions) >= self.config["mudrex"]["max_positions"]:
-                    logger.info(f"⏳ Max positions reached ({len(open_positions)}). Waiting...")
+                # Enforce max position limit (hard-coded to 3)
+                if current_count >= MAX_POSITIONS:
+                    logger.info(f"⏳ Max positions reached ({current_count}/{MAX_POSITIONS}). Waiting for positions to close...")
                     time.sleep(60)
                     continue
                 
@@ -217,16 +231,24 @@ class SMCTradingBot:
                     # Progress log every 25 symbols
                     if i > 0 and i % 25 == 0:
                         logger.info(f"   Progress: {i}/{len(symbols)}...")
+                    
+                    # Re-check position count before scanning each symbol
+                    current_positions = len(self.executor.get_open_positions())
+                    if current_positions >= MAX_POSITIONS:
+                        logger.info(f"⏳ Max positions reached ({current_positions}/{MAX_POSITIONS}). Stopping scan.")
+                        break
+                    
+                    # Check cooldown before each potential trade
+                    in_cooldown, _ = self.executor.is_in_cooldown()
+                    if in_cooldown:
+                        logger.info("⏳ Balance cooldown activated. Stopping scan.")
+                        break
                         
                     # Scan
                     side, details = self.scan_symbol(symbol)
                     
                     if side:
                         self.execute_signal(symbol, side, details)
-                        
-                        # Stop scanning if max positions reached
-                        if len(self.executor.get_open_positions()) >= self.config["mudrex"]["max_positions"]:
-                            break
                             
                     # Rate limit scan delay
                     time.sleep(self.config["mudrex"]["scan_delay_ms"] / 1000)
